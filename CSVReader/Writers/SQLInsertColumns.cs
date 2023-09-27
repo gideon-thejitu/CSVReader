@@ -22,7 +22,7 @@ public class SQLInsertColumns
 
     private IList<string> BuildData(DataSet dataset)
     {
-        var dataTable = dataset.Tables[0];
+        var dataTable = dataset.Tables[dataset.Tables[0].TableName];
         var columns = dataTable.Columns;
         var rows = dataTable.Rows;
 
@@ -73,11 +73,18 @@ public class SQLInsertColumns
 
         switch (index)
         {
+            case 1:
+            case 3:
+            {
+                _value = IsEmpty(value) ? "NULL" : value;
+                break;
+            }
             case 2:
             case 4:
             case 6:
+            case 9:
             {
-                _value = IsEmpty(value) ? "''" : $"'{value}'";
+                _value = IsEmpty(value) ? "NULL" : $"'{EscapeApos(value)}'";
                 break;
             }
 
@@ -90,7 +97,7 @@ public class SQLInsertColumns
             case 11:
             case 12:
             {
-                _value = IsEmpty(value) ? "Null" : value;
+                _value = IsEmpty(value) ? "NULL" : value;
                 break;
             }
             default:
@@ -113,5 +120,25 @@ public class SQLInsertColumns
         }
 
         return value == "True" ? "1" : "0";
+    }
+
+    private bool ContainsApos(string value)
+    {
+        if (IsEmpty(value))
+        {
+            return false;
+        }
+
+        return value.Contains("'");
+    }
+
+    private string EscapeApos(string value)
+    {
+        if (ContainsApos(value) == false)
+        {
+            return value;
+        }
+
+        return value.Replace("'", "''");
     }
 }

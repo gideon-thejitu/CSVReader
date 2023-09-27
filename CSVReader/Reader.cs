@@ -37,7 +37,7 @@ public class Reader
         } while (reader.NextResult());
        
         var result = reader.AsDataSet(_configuration);
-        
+
         _sqlInsertColumns.Write(result);
         
         reader.Close();
