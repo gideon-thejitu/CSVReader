@@ -1,13 +1,16 @@
 using System.Data;
+using CSVReader.Formatters;
 
 namespace CSVReader;
 
 public class SQLInsertColumns
 {
     private readonly string _outFile;
-    public SQLInsertColumns(string outFile)
+    private readonly IBaseFormatter _formatter;
+    public SQLInsertColumns(string outFile, IBaseFormatter formatter)
     {
         _outFile = outFile;
+        _formatter = formatter;
     }
     public void Write(DataSet dataset)
     {
@@ -37,7 +40,7 @@ public class SQLInsertColumns
             foreach (var col in columns)
             {
                 var celValue = rows[index][innerIndex].ToString();
-                var value = FormatValue(celValue, innerIndex);
+                var value = _formatter.Format(celValue, innerIndex);
        
                 if (innerIndex == 0)
                 {
@@ -65,80 +68,5 @@ public class SQLInsertColumns
         }
 
         return toWrite;
-    }
-    
-    private string FormatValue(string value, int index)
-    {
-        var _value = value;
-
-        switch (index)
-        {
-            case 1:
-            case 3:
-            {
-                _value = IsEmpty(value) ? "NULL" : value;
-                break;
-            }
-            case 2:
-            case 4:
-            case 6:
-            case 9:
-            {
-                _value = IsEmpty(value) ? "NULL" : $"'{EscapeApos(value)}'";
-                break;
-            }
-
-            case 7:
-            case 8:
-            {
-                _value = ToBit(value);
-                break;
-            }
-            case 11:
-            case 12:
-            {
-                _value = IsEmpty(value) ? "NULL" : value;
-                break;
-            }
-            default:
-                break;
-        }
-
-        return _value;
-    }
-
-    private bool IsEmpty(string? value)
-    {
-        return value is null || value == "";
-    }
-
-    private string ToBit(string? value)
-    {
-        if (IsEmpty(value))
-        {
-            return "0";
-        }
-
-        return value == "True" ? "1" : "0";
-    }
-
-    private bool ContainsApos(string value)
-    {
-        if (IsEmpty(value))
-        {
-            return false;
-        }
-
-        return value.Contains("'");
-    }
-
-    private string EscapeApos(string value)
-    {
-        if (ContainsApos(value) == false)
-        {
-            return value;
-        }
-
-        return value.Replace("'", "''");
     }
 }

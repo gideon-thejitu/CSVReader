@@ -1,3 +1,4 @@
+using CSVReader.Formatters;
 using ExcelDataReader;
 
 namespace CSVReader;
@@ -14,12 +15,13 @@ public class Reader
 
     private readonly SQLInsertColumns _sqlInsertColumns;
     private readonly string _fileName;
+    private readonly IBaseFormatter _formatter;
 
-
-    public Reader(string fileName, string outFile)
+    public Reader(string fileName, string outFile, IBaseFormatter formatter)
     {
         _fileName = fileName;
-        _sqlInsertColumns = new SQLInsertColumns(outFile);
+        _formatter = formatter;
+        _sqlInsertColumns = new SQLInsertColumns(outFile, _formatter);
     }
 
     public void Start()
